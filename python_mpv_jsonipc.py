@@ -1,18 +1,19 @@
-import threading
-import socket
 import json
-import os
-import time
-import subprocess
-import random
-import queue
 import logging
+import os
+import queue
+import random
+import socket
+import subprocess
+import threading
+import time
 
 log = logging.getLogger('mpv-jsonipc')
 
 if os.name == "nt":
-    import _winapi
     from multiprocessing.connection import PipeConnection
+
+    import _winapi
 
 TIMEOUT = 120
 
@@ -319,8 +320,11 @@ class MPVInter:
         event = threading.Event()
         self.cid_wait[command_id] = event
 
-        command_list = [command]
-        command_list.extend(args)
+        if type(command) == dict:
+            command_list = command
+        else:
+            command_list = [command]
+            command_list.extend(args)
         try:
             self.socket_lock.acquire()
             self.socket.send({"command":command_list, "request_id": command_id})
